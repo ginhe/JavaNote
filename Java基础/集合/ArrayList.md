@@ -63,8 +63,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             //创建空数组
             this.elementData = EMPTY_ELEMENTDATA;
         } else {
-            throw new IllegalArgumentException("Illegal Capacity: "+
-                                               initialCapacity);
+            throw new IllegalArgumentException("Illegal Capacity: "+ initialCapacity);
         }
     }
 
@@ -77,7 +76,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
     
     /*
 		参数为集合c的的构造函数：
-			（1）将c的数组赋值给elementData。
+			将c的数组赋值给elementData。
 				（1-1）如果elementData的长度不等于0，并且如果elementData不是object类型数组，那么将其转成Object数组
 				（1-2）否则elementData为空数组
     */
@@ -135,14 +134,15 @@ public boolean add(E e) {
 
 ## ensureCapacityInternal方法
 
-如果elementData为空数组，则minCapacity的值为（默认容量10，minminCapacity）里的最大值。
+设置最小容量minCapacity的值：如果elementData为空数组，则minCapacity的值为（默认容量10，minCapacity）里的最大值。
 
 ```java
-   //若ArrayList是无参构造初始化的，则minCapacity = 1；
+   //若ArrayList是无参构造初始化的，则此时minCapacity = 1
     private void ensureCapacityInternal(int minCapacity) {
-		//elementData在无参构造以及给定容量但容量是0的有参构造情况下才是空数组DEFAULTCAPACITY_EMPTY_ELEMENTDATA
+		//elementData是空数组的情况：
+        //(1)无参构造；(2)给定容量但容量是0的有参构造
         if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
-            //无参构造下的minCapacity取值10
+            //无参和有参构造下的minCapacity取值10，否则是预计添加元素后的数组长度      
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
@@ -152,12 +152,12 @@ public boolean add(E e) {
 
 ## ensureExplicitCapacity方法
 
-如果最小容量minCapacity大于elementData的长度，则进行扩容方法。
+如果最小容量minCapacity大于当前数组长度，则进行扩容方法。
 
 ```java
 private void ensureExplicitCapacity(int minCapacity) {
     modCount++; 
-    //如果最小容量超出了当前数组长度
+    //如果是无参构造则肯定扩容；如果是有参构造则则判断给定的数组容量是否小于10
     if (minCapacity - elementData.length > 0)
         grow(minCapacity);//执行扩容的方法
 }
@@ -195,18 +195,25 @@ cursor确实不等于size，因此还会进行下一次循环。如果我们不�
 
 ## grow方法
 
+（1）将新容量newCapacity计算为旧容量的1.5倍，如果newCapacity 小于minCapacity（值为10或者预计添加元素后的长度），则newCapacity =minCapacity
+
+（2）如果newCapacity 大于MAX_ARRAY_SIZE，则调用`hugeCapacity`方法取值。
+
+（3）扩展数组，并将原数组中的元素拷贝
+
 ```java
 /*
     考虑到不同的JVM会加入一下数据头，当扩容后的容量大于MAX_ARRAY_SIZE，
     我们会去比较最小需要容量和MAX_ARRAY_SIZE。
 */
 private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
 private void grow(int minCapacity) {
     // oldCapacity为旧数组的容量
     int oldCapacity = elementData.length;
     // newCapacity为新数组的容量，它是旧容量的1.5倍
     int newCapacity = oldCapacity + (oldCapacity >> 1);
-    // 如果新容量的大小小于最小容量，则按最小容量进行扩容
+    // 如果新容量小于最小容量，则按最小容量进行扩容
     if (newCapacity - minCapacity < 0)
         newCapacity = minCapacity;
     //如果新容量大于MAX_ARRAY_SIZE，使用hugeCapacity方法比较
@@ -220,33 +227,62 @@ private void grow(int minCapacity) {
 
 ### hugeCapacity方法
 
+如果最小容量大于MAX_ARRAY_SIZE，则返回Integer.MAX_VALUE ，否则返回MAX_ARRAY_SIZE。
+
 ```java
 private static int hugeCapacity(int minCapacity) {
     if (minCapacity < 0) 
         throw new OutOfMemoryError();
-    //MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
-    //对minCapacity和MAX_ARRAY_SIZE进行比较：
-    //若minCapacity大，将Integer.MAX_VALUE作为新数组大小
-    //若MAX_ARRAY_SIZE大，将MAX_ARRAY_SIZE作为新数组大小
+    /*
+    MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    对minCapacity和MAX_ARRAY_SIZE进行比较：
+        若minCapacity大，将Integer.MAX_VALUE作为新数组大小
+        若MAX_ARRAY_SIZE大，将MAX_ARRAY_SIZE作为新数组大小
+    */
     return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE 
                                     : MAX_ARRAY_SIZE;
 }
 ```
 
-以无参初始化的ArrayList为例，它的容量为10：当添加第11个元素时，就会进入grow方法：计算出newCapacity = 15，后两个判断条件都不满足，因此数组扩容为15，size变为11.
+以无参初始化的ArrayList为例，它的容量为10：当添加第11个元素时，就会进入grow方法：计算出newCapacity = 15，后两个判断条件都不满足，因此数组扩容为15，size变为11。
+
+
+
+## ArrayList的线程不安全
+
+ArrayList的线程不安全性主要体现在：
+
+添加元素操作不是原子性的：`elementData[size++] = e;`，这段代码分为两步：
+
+- elementData[size] = e;
+- size++;
+
+我们来假设在一个多线程环境下，当前列表长度为0：
+
+- 线程 A 执行完 `elementData[size] = e;`之后挂起。A 把 "a" 放在了下标为 0 的位置。此时 size = 0。
+- 线程 B 执行 `elementData[size] = e;` 因为此时 size = 0，所以 B 把 "b" 放在了下标为 0 的位置，于是刚好把 A 的数据给覆盖掉了。
+- 线程 B 将 size 的值增加为 1，线程 A 将 size 的值增加为 1。
+
+这样在线程 A 和线程 B 都执行完之后理想情况下应该是 "a" 在下标为 0 的位置，"b" 在标为 1 的位置。而实际情况确是下标为 0 的位置为 "b"，下标为 1 的位置啥也没有。
 
 
 
 # add(int index,E element)方法
 
+（1）首先判断indx是否在[0, size - 1]区间中
+
+（2）检查是否需要扩容，然后[index, size-1]的元素都向后移一位
+
+（3）将新元素element插入至 index 处，然后size++。
+
 
 ```java
-//在元素序列 index 位置处插入
+//在元素序列 index 位置处插入元素element
 public void add(int index, E element) {
     rangeCheckForAdd(index); //判断index是否在[0, size - 1]区间中
     // 检测是否需要扩容
     ensureCapacityInternal(size + 1);  
-    // 将 index 及其之后的所有元素都向后移一位
+    // [index, size-1]的元素都向后移一位
     System.arraycopy(elementData, index, elementData, index + 1, size - index);
     // 将新元素插入至 index 处
     elementData[index] = element;
@@ -270,12 +306,12 @@ public E remove(int index) {
     rangeCheck(index); //校验下标是否合法
     modCount++;//修改list结构，就需要更新这个值
     E oldValue = elementData(index); //根据下标查找值
-
+	
     int numMoved = size - index - 1;//index后面有多少个元素
     if (numMoved > 0)
-        //index后面的所有元素左移一位
+        //[index +1, size-1]的元素左移一位
         System.arraycopy(elementData, index+1, elementData, index, numMoved);
-    //移动后，原数组中size位置为null
+    //移动后，原数组中size-1位置为null
     elementData[--size] = null; // clear to let GC do its work
     //返回旧值
     return oldValue;

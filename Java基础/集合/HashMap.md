@@ -1,8 +1,7 @@
 # 概述
 HashMap用于存储键值对，它的大致继承结构如下：
 
-
-![](https://user-gold-cdn.xitu.io/2020/5/4/171de39aceadf83d?w=1060&h=419&f=png&s=169287)
+<img src="https://user-gold-cdn.xitu.io/2020/5/4/171de39aceadf83d?w=1060&amp;h=419&amp;f=png&amp;s=169287" style="zoom:50%;" />
 
 
 ```java
@@ -201,8 +200,14 @@ static final int hash(Object key) {
 }
 ```
 
+<img src="https://user-gold-cdn.xitu.io/2020/5/4/171dedcb708c761a?w=760&amp;h=470&amp;f=png&amp;s=127457" style="zoom:50%;" />
 
-![](https://user-gold-cdn.xitu.io/2020/5/4/171dedcb708c761a?w=760&h=470&f=png&s=127457)
+**为什么要右移16位?**
+
+由于和（length-1）运算，length 绝大多数情况小于2的16次方。所以始终是hashcode 的低16位（甚至更低）参与运算。从而造成高16位是用不到的
+
+要是高16位也参与运算，就可以让得到的下标更加散列。如何让高16也参与运算呢：让他的hashCode()和自己的高16位异或运算。
+
 
 
 # 构造方法
@@ -213,26 +218,22 @@ static final int hash(Object key) {
         this.loadFactor = DEFAULT_LOAD_FACTOR; 
      }
      
-     // 包含另一个“Map”的构造函数
-     public HashMap(Map<? extends K, ? extends V> m) {
-         this.loadFactor = DEFAULT_LOAD_FACTOR;
-         //putMapEntries方法将传入的m添加到本map实例中
-         putMapEntries(m, false);
-     }
-     
      // 指定“容量大小”的构造函数
      public HashMap(int initialCapacity) {
          this(initialCapacity, DEFAULT_LOAD_FACTOR);
      }
      
-     // 指定“容量大小”和“加载因子”的构造函数
+     // 加载因子loadFactor为默认，阔值threshold为大于指定长度initialCapacity的最小二次幂
      public HashMap(int initialCapacity, float loadFactor) {
          if (initialCapacity < 0)
              throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
+         
          if (initialCapacity > MAXIMUM_CAPACITY)
              initialCapacity = MAXIMUM_CAPACITY;
+         
          if (loadFactor <= 0 || Float.isNaN(loadFactor))
              throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
+         //默认加载因子
          this.loadFactor = loadFactor;
          //计算大于initialCapacity的最小二次幂
          this.threshold = tableSizeFor(initialCapacity);
@@ -282,15 +283,14 @@ final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
 
 该方法负责将key-value放入hashMap里：
 
-- 如果桶为空或长度为0，则扩容。通过hash & (table.length - 1)计算要放入桶的下标i：
+- 如果桶为空或长度为0，则扩容。然后通过hash & (table.length - 1)计算要放入桶的下标i：
 
   - 如果位置i为空，则新建节点e并放进桶里
 
-  - 否则表明产生了hash冲突。比较在该位置的节点p的hash值与key值是否和要放进的key值（key通过==和equals方法比较）和hash值相同：若是则e = p
+  - 否则表明产生了hash冲突。比较 该位置的节点p的hash值 && (p的key值 || p的key的引用) ：若是则e = p，否则：
 
-    - 如果不相同的话，如果p是树节点，则将key-value添加进红黑树
-
-      - 如果p是链表节点，则遍历链表：如果存在一个节点的hash值和key值与要放进的相同，则更新旧值。否则将新节点放到链表尾部。
+    - 如果p是树节点，则将key-value添加进红黑树
+    - 如果p是链表节点，则遍历链表：如果存在一个节点的hash值和key值与要放进的相同，则更新旧值。否则将新节点放到链表尾部。
 - 最后判断节点个数size是否大于临界值，若是则resize
 
 
@@ -403,7 +403,7 @@ final Node<K,V> getNode(int hash, Object key) {
 ```
 
 # resize方法
-当HashMap里的元素个数size大于DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY时，需要扩大数组长度。该方法的实现是使用一个新数组代替旧数组。
+当HashMap里的元素个数size大于阔值或者第一次put元素时，需要扩大数组长度。
 
 看一下JDK1.7下的resize方法：
 
@@ -413,7 +413,7 @@ final Node<K,V> getNode(int hash, Object key) {
 
 ​		（2-1）遍历旧桶里src的每一个节点e：释放节点e，然后根据 hash & (newTable.length-1)计算e在newTable里的位置i，然后添加到对应位置。每次添加的新节点都是链表头节点。
 
-（3）修改极限值为新桶长度newCapacity * loadFactor
+（3）修改阔值为新桶长度newCapacity * loadFactor
 
 
 ```java
@@ -430,8 +430,8 @@ final Node<K,V> getNode(int hash, Object key) {
       //（2）将数据转移到新的Entry数组里
      transfer(newTable);                         
      table = newTable;   
-     //(3)
-     threshold = (int)(newCapacity * loadFactor);//修改阈值
+     //(3)修改阔值为新桶长度newCapacity * loadFactor
+     threshold = (int)(newCapacity * loadFactor);
  }
  
   void transfer(Entry[] newTable) {
@@ -464,15 +464,15 @@ static int indexFor(int h, int length) {
 
 （1）如果旧桶的长度oldCap大于0且大于等于最大容量MAXIMUM_CAPACITY，则将极限值threshold设置为Integer.MAX_VALUE，然后返回
 
-（2）新桶长度newCap为旧桶长度oldCap的2倍，若newCap小于最大容量MAXIMUM_CAPACITY且oldCap大于等于默认容量DEFAULT_INITIAL_CAPACITY，则新阔值newThr变为旧阔值的2倍。
+（2）<u>新桶长度newCap为旧桶长度oldCap的2倍</u>。若newCap小于最大容量MAXIMUM_CAPACITY且oldCap大于等于默认容量DEFAULT_INITIAL_CAPACITY（也就是说不是第一次扩容），则新阔值newThr变为旧阔值的2倍。
 
-（3）否则如果旧阔值oldThr大于0，则新桶长度newCap为oldThr。
+（3）否则如果旧阔值oldThr大于0（此时是第一次扩容，但是通过有参构造来初始化hashmap的)，则新桶长度newCap为oldThr。
 
-（4）否则如果旧桶为空，且旧阔值为0（即此是是无参构造初始化里的resize情况），那么newCap为默认长度16，newThr为默认装载因子 * 默认桶长度。
+（4）否则如果旧桶为空，且旧阔值为0（此时是第一次添加元素的情况），那么newCap为默认长度16，newThr为默认装载因子 * 默认桶长度。
 
-（5）如果newThr为空，则判断ft = newCap * loadFactor是否小于MAXIMUM_CAPACITY且newCap < MAXIMUM_CAPACITY：若是则newThr = ft。否则newThr = Integer.MAX_VALUE
+（5）如果newThr为空（第2步或第3步），则判断ft = newCap * loadFactor是否小于MAXIMUM_CAPACITY且newCap < MAXIMUM_CAPACITY：若是则newThr = ft。否则newThr = Integer.MAX_VALUE
 
-（6）创建一个长度是newThr的新桶newTab，遍历旧桶里的节点e：
+（6）创建一个长度是newCap的新桶newTab，遍历旧桶里的节点e：
 
 ​	（6-1）将e置为空。如果e的下一节点不为空，则通过e.hash & (newCap - 1)计算在新桶里的下标；
 
@@ -504,7 +504,7 @@ final Node<K,V>[] resize() {
             newThr = oldThr << 1; 
     }
     /*
-        （3）如果HashMap不是调用无参构造初始化的，那么threshhold肯定调用了
+        （3）如果HashMap是通过有参构造来初始化的，则oldThr是指定长度initialCapacity的最小2次幂
         tabSizeFor方法变成2的整数次幂，因此旧阔值作为数组长度。
     */
     else if (oldThr > 0) 

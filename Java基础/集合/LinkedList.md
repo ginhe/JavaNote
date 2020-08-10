@@ -1,22 +1,24 @@
 # 概述
-（1）LinkedList底层采用的双向链表结构，因此它在链表头部和尾部的插入和删除操作的效率较高，而其他位置的效率较低，而它实现了Deque接口，表示它具有队列的特性；
+（1）LinkedList底层采用的双向链表结构，因此它在链表头部和尾部的插入和删除操作的效率较高，而其他位置的效率较低。
 
-（2）LinkedList支持空值和重复值
+（2）它实现了Deque接口，表示它具有队列的特性；
 
-（3）LinkedList不是线程安全的，但通过调用静态类Collections类中的synchronizedList方法来使它变得线程安全：
+（3）LinkedList支持空值和重复值
+
+（4）LinkedList不是线程安全的，但通过调用静态类Collections类中的synchronizedList方法来使它变得线程安全：
 
 
-```
+```java
 List list=Collections.synchronizedList(new LinkedList());
 ```
+
 
 
 # 继承体系和成员属性
 
 ## 继承体系
 
-
-![](https://user-gold-cdn.xitu.io/2020/5/4/171ddd5676c1d8f9?w=816&h=638&f=png&s=160123)
+<img src="https://user-gold-cdn.xitu.io/2020/5/4/171ddd5676c1d8f9?w=816&amp;h=638&amp;f=png&amp;s=160123" style="zoom: 50%;" />
 
 ## 成员属性
 
@@ -57,8 +59,6 @@ public LinkedList(Collection<? extends E> c) {
     this();
     addAll(c);
 }
-
-public LinkedList() {}
 
 public boolean addAll(Collection<? extends E> c) {
     return addAll(size, c);
@@ -140,11 +140,11 @@ public void addLast(E e) {
 void linkLast(E e) {
     //获得当前链表的尾节点
     final Node<E> l = last;
-    //创建一个新的结点，它将作为链表的新尾节点
+    
     final Node<E> newNode = new Node<>(l, e, null);
     //当前链表尾节点为newNode
     last = newNode;
-    //若添加前 链表尾节点为null，则新节点也是头节点
+    //若在添加前 链表尾节点为null，则新节点也是头节点
     if (l == null)
         first = newNode;
     //将链表的原尾节点的后继节点指向新尾节点newNode
@@ -185,7 +185,7 @@ private void linkFirst(E e) {
 
 ```java
 public void add(int index, E element) {
-    //检查index。index的取值范围是[0, size]，其中0~size -1有节点
+    //检查index是否在[0, size]范围，其中0~size -1有节点
     checkPositionIndex(index);
     //index等于size，就在尾部插入新节点，
     if (index == size)
@@ -373,69 +373,7 @@ list = null;
 */
 ```
 
-## 查找
 
-```java
-public E get(int index) {
-    checkElementIndex(index); 
-    return node(index).item; 
-}
-
-// Node类的根据下标查找节点方法
-Node<E> node(int index) {
-    //如果index在链表的前半部分
-    if (index < (size >> 1)) {
-        //则从头节点开始遍历链表
-        Node<E> x = first;
-        for (int i = 0; i < index; i++)
-            x = x.next;
-        return x;
-    } else {
-        //否则从尾节点倒序遍历链表
-        Node<E> x = last;
-        for (int i = size - 1; i > index; i--)
-            x = x.prev;
-        return x;
-    }
-}
-```
-
-## 遍历
-
-```java
-public ListIterator<E> listIterator(int index) {
-    checkPositionIndex(index);
-    return new ListItr(index);
-}
-private class ListItr implements ListIterator<E> {
-    private Node<E> lastReturned;
-    private Node<E> next;
-    private int nextIndex;
-    private int expectedModCount = modCount;
-
-    ListItr(int index) {
-       //
-        next = (index == size) ? null : node(index);
-        nextIndex = index;
-    }
-
-    public boolean hasNext() {
-        return nextIndex < size;
-    }
-
-    public E next() {
-        checkForComodification();
-        if (!hasNext())
-            throw new NoSuchElementException();
-        lastReturned = next;
-        next = next.next;
-        nextIndex++;
-        return lastReturned.item;
-    }
-	//省略其他方法
-}
-
-```
 
 
 

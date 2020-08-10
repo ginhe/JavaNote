@@ -36,12 +36,12 @@ public  abstract class ClassName {
 在使用抽象类时应注意：
 
 1. 抽象类可以拥有具体成员变量和具体成员方法。
-2. 抽象类可以没有抽象方法，但是如果一个类已经声明成了抽象类，即使这个类中没有抽象方法，它也不能再实例化；如果一个类中有了一个抽象方法，那么这个类必须声明为抽象类。
-3. 如果一个**非抽象类**继承了抽象类，则非抽象类必须实现抽象父类的所有抽象方法。否则它必须声明为抽象类
+2. 抽象类可以没有抽象方法，但是如果一个类已经声明成了抽象类，即使这个类中没有抽象方法，它也不能再实例化，它只能被声明并引用自其子类；如果一个类中有了一个抽象方法，那么这个类必须声明为抽象类。
+3. 如果一个非抽象类继承了抽象类，则非抽象类必须实现抽象父类的所有抽象方法。否则它必须声明为抽象类
 
-4. abstract不能和final同时修饰同一方法。用final修饰后，修饰类代表不可以继承，修饰方法则代表不可重写。
+4. **abstract不能和final同时修饰同一方法。用final修饰后，修饰类代表不可以继承，修饰方法则代表不可重写。**
 
-5. abstract不能与static修饰同一个方法，static修饰的方法可以用类名调用，而对于abstract修饰的方法没有具体的方法实现，所有不能直接调用。
+5. **abstract不能与static修饰同一个方法，static修饰的方法可以用类名调用，而对于abstract修饰的方法没有具体的方法实现，不能直接调用。**
 
 
 
@@ -71,7 +71,7 @@ public  interface InterfaceName {
 
 在使用接口应注意：
 
-1. 接口的方法权限默认为public abstract，但你也可以声明为static或default，这样static方法只能通过接口名（而不是实现类的类名）调用；而default方法只能通过接口实现类的对象来调用。
+1. 接口的方法权限默认为public abstract，但你也可以声明为static或default，这样static方法只能通过接口名（而不是实现类的类名）调用；而default方法只能是接口实现类的对象来调用。
 
 2. 接口中定义的所有变量默认是**public static final**的，定义的时候必须赋值，
 
@@ -186,7 +186,7 @@ public class Test {
 
 ### 重写与重载
 
-实现多态的方式有：重写和重载。
+构成多态的方式之一是重写。
 
 **重写**
 
@@ -196,7 +196,7 @@ public class Test {
 * 子类函数的访问修饰权限不能比父类对应的访问权限还要严格；
 * 子类方法抛出的异常类型必须是父类抛出的异常类型或其子类型。
 
-此外子类不能重写父类的静态方法，这是因为静态方法是指程序一运行就已经分配好了内存地址，并且地址是固定的。如果子类定义了相同名称的静态方法，只会新增一个内存地址，不会重写。
+此外子类不能重写父类的静态方法，这是因为静态方法是指程序一运行就已经分配好了内存地址，并且地址是固定的。如果子类定义了相同名称的静态方法，只会新增一个内存地址，不会重写，也就是覆盖了父类的静态方法。如果添加了@Overide表示这个静态方法是重写的。则会报错。
 
 **重载**
 
@@ -258,8 +258,7 @@ public class Parent
 }  
 ```
 ```java
-public class Child extends Parent  
-{  
+public class Child extends Parent  {  
     public Child()  
     {  
         System.out.println("Child>>>>>>>>>>>1");  
@@ -300,13 +299,13 @@ public class Child extends Parent
 //        stringBuffer = new StringBuffer("1");   报错
         stringBuffer.append("12");
 ```
-（3）**当final作用于类**：该类无法被继承，且类中的方法会被隐式地指定为 final 方法。
+（3）**当final作用于类**：该类无法被继承，且类中的方法会被隐式地指定为 final 方法，，但成员变量则不会变。
 
 
 
 ## instance of
 
-用于判断某一对象是否为某一类型或其子类。而getClass返回的是该对象实际指向的类型。
+用于判断某一对象是否为某一类型或其子类。而getClass方法返回的是该对象实际指向的类型。
 
 ```java
     static class Fruit {}
@@ -332,7 +331,7 @@ public class Child extends Parent
 
 # 内部类
 
-内部类可以分为四类：普通内部类、静态内部类、匿名内部类、局部内部类。此处仅介绍普通内部类、静态内部类、匿名内部类。
+内部类可以分为四类：普通内部类、静态内部类、匿名内部类、局部内部类。此处仅介绍前三者。
 ## 普通内部类
 
 ```java
@@ -435,7 +434,6 @@ public class Demo {
 
 # 数据类型
 
-## 基本数据类型
 **字符与字节的概念**
 
 字节是通过网络传输信息（或在硬盘或内存中存储信息）的单位，也是计算机用于计量存储容量和传输容量的一种计量单位，1个字节等于8位二进制。而字符是人们使用的符号，比如'1'， '中'， 'a'， '$'， '￥等等。
@@ -455,9 +453,9 @@ public class Demo {
 
 （2）utf8字符集
 
-它收录地球上能想到的所有字符，⽽且还在不断扩充。这种字符集兼容ASCII字符集，编码⼀个字符需要使⽤1～4个字节。
+它收录地球上能想到的所有字符，⽽且还在不断扩充。这种字符集兼容ASCII字符集，编码⼀个字符需要使⽤1～4个字节。其中汉字占3个字节。
 
-**基本数据类型**
+## 基本数据类型
 
 Java有8种基本数据类型，分别是：
 
@@ -641,9 +639,9 @@ System.out.println("b == c " + (b == c));      // true
 System.out.println("b.equals(c) " + b.equals(c));      // true
 ```
 
-### String str= "a" + "b" + "c" 一共创建了几个对象
-
-答案是一个。java可以在编译时对字符串常量直接相加的表达式进行优化，而不必等到运行期再去进行加法运算处理。
+> **String str= "a" + "b" + "c" 一共创建了几个对象**
+>
+> 答案是一个。java可以在编译时对字符串常量直接相加的表达式进行优化，而不必等到运行期再去进行加法运算处理。
 
 ### String、StringBuilder与StringBuffer区别
 
@@ -780,9 +778,9 @@ public static Integer valueOf(int i) {
 
 ### 深拷贝和浅拷贝
 
-**深拷贝**：对基本数据类型进行值传递，对引用数据类型进行引用传递。
+**浅拷贝**：对基本数据类型进行值传递，对引用数据类型进行引用传递。
 
-**浅拷贝**：对基本数据类型进行值传递，对引用数据类型则创建一个新的对象，并复制其内容
+**深拷贝**：对基本数据类型进行值传递，对引用数据类型则创建一个新的对象，并复制其内容
 
 ![](https://user-gold-cdn.xitu.io/2020/5/3/171d86c504420d76?w=448&h=202&f=png&s=85709)
 
@@ -908,13 +906,13 @@ String x = "string";
 String y = "string";
 String z = new String("string");
 System.out.println(x == y); // true
-System.out.println(x == z); // false    String()方法重新开辟内存空间
+System.out.println(x == z); // false   
 System.out.println(x.equals(y)); // true
 ```
 
 
 
-## 空指针异常
+### 空指针异常
 
 Object的equals方法容易抛空指针异常，因此我们应该使用常量或确定有值的对象来调用 equals方法。
 
@@ -1021,7 +1019,7 @@ public class Student {
    }
 ```
 
-如果你注释掉Student类中equals和hashCode两个方法中的任意一，那么map也会把s2放进 。
+如果你注释掉Student类中equals和hashCode两个方法中的任意一，则hashmap会认为s1和s2不相同，然后把s2放进hashmap里 。
 
 
 
@@ -1045,7 +1043,11 @@ public class Student {
 
 程序无法处理的错误，表示Java运行时系统的内部错误和资源耗尽错误，例如Java 虚拟机运行错误，OutOfMemoryError等。这些异常发生时，JVM会选择线程终止。
 
+> error可以被捕获，但我们不需要去捕获，因为出现Error的情况会造成程序直接无法运行，所以捕获了也没有任何意义。
+
 **（2）Exception**
+
+程序可以处理的异常，可以捕获且可能恢复。
 
 这种异常分为 运行时异常RuntimeException和非运行时异常IOException(编译异常)。
 
@@ -1070,10 +1072,233 @@ public string toString()：返回异常发生时的详细信息
 
 **finally块**：无论是否捕获或处理异常，finally 块里的语句都会被执行。如果在 try 块或 catch 块中遇到 return 语句时，finally 语句块将在方法返回之前被执行。
 
->- 如果finally语句第一行出现了异常，则finally块不会执行；若在其他行则还会得到执行。
+>- 如果finally语句第一行出现了异常，则finally块不会执行；若在其他行则还会得到执行。	
 >
 >
 >- 此外如果try 语句和 finally 语句中都有 return 语句，则finally语句的返回值会覆盖掉try语句块的返回值。
+
+
+
+# 集合
+
+## 概述
+
+Java集合大致分为Conllection和Map接口：
+
+<img src="https://user-gold-cdn.xitu.io/2020/7/18/1735fa8a4fbc02ef?w=942&amp;h=461&amp;f=png&amp;s=166242"  />
+
+### Iterator 迭代器
+
+Iterator 迭代器可以用于对集合进行遍历，如果在遍历过程中，集合元素被修改，会抛出 `ConcurrentModificationException` 异常。
+
+```java
+public interface Iterator<E> {
+    //集合中是否还有元素
+    boolean hasNext();
+    //获得集合中的下一个元素
+    E next();
+    ......
+}
+```
+
+**使用示例**
+
+```java
+Map<Integer, String> map = new HashMap();
+map.put(1, "Java");
+map.put(2, "C++");
+map.put(3, "PHP");
+
+Iterator<Map.Entry<Integer, String>> iterator = map.entrySet().iterator();
+while (iterator.hasNext()) {
+  Map.Entry<Integer, String> entry = iterator.next();
+  System.out.println(entry.getKey() + entry.getValue());
+}
+```
+
+
+
+### List接口
+
+List存储的元素是有序，可重复的。它又分为ArrayList，Vector和LinkedList。
+
+- ArrayList 是 List 的主要实现类，底层使用了Object[]数组。适用于频繁的查找工作，线程不安全
+- Vector 是 List 的古老实现类，底层使用了Object[]数组。但它的方法使用了synchronized修饰符，因此线程安全但性能比前者低。
+- LinkedList底层使用了双向链表。
+
+如果是在多线程环境下，更推荐如下：
+
+```java
+ArrayList list = Collections.synchronizedList( new ArrayList() );
+```
+
+如果我们需要对一个集合使用自定义排序时，我们就要重写`compareTo()`方法或`compare()`方法。
+
+```java
+ArrayList<Integer> arrayList = new ArrayList<Integer>();
+        arrayList.add(-1);
+        arrayList.add(3);
+        arrayList.add(3);
+        arrayList.add(-5);
+        arrayList.add(7);
+        arrayList.add(4);
+        arrayList.add(-9);
+        arrayList.add(-7);
+        System.out.println("原始数组:");
+        System.out.println(arrayList);
+
+        // void sort(List list),按自然排序的升序排序
+        Collections.sort(arrayList);
+        System.out.println("Collections.sort(arrayList):");
+        System.out.println(arrayList);
+        // 定制排序的用法
+        Collections.sort(arrayList, new Comparator<Integer>() {
+
+            /*
+            	对于compareTo方法：若参数o1大于调用方法的对象o2，则返回小于0的数
+            	对于compare方法：如果返回值小于0，则需要交换o1和o2的顺序。
+            */
+            
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2.compareTo(o1);		
+            }
+        });
+        System.out.println("定制排序后：");
+        System.out.println(arrayList);
+
+
+/*
+
+原始数组:
+[-1, 3, 3, -5, 7, 4, -9, -7]
+Collections.sort(arrayList):
+[-9, -7, -5, -1, 3, 3, 4, 7]
+定制排序后：
+[7, 4, 3, 3, -1, -5, -7, -9]
+
+*/
+```
+
+如果要比较的对象是自定义类，则需要实现Comparable接口
+
+```java
+public  class Person implements Comparable<Person> {
+    @Override
+    public int compareTo(Person o) {
+        ...
+    }
+}
+```
+
+
+
+
+#### 常用方法
+
+**ArrayList**
+
+```java
+        ArrayList<Integer> alist = new ArrayList<>();
+        alist.add(32);
+		alist.add(0,23);		//(1)在下标0处插入数字
+
+		//(2)遍历方式
+        for(Iterator it  = alist.iterator(); it.hasNext(); ) {
+            System.out.println(it.next());
+        }
+
+        for(Integer tmp:alist){
+            System.out.println(tmp);
+        }
+		for(int i = 0;i < alist.size(); i ++){
+    		System.out.println(list.get(i));
+		}	
+		alist.clear();		//(3)删除所有元素
+
+		//(4) alist.contains(23);
+		//(5)alist.get(0);
+		//(6)alist.indexOf(23) 				返回指定元素第一次出现的列表中的索引，若不存在则返回-1
+		//(7)alist.lastIndexOf(23)			返回指定元素最后一次出现的列表中的索引
+		//(8)int[] arr = alist.toArray() 	返回包含所有元素的数组
+		//(9)boolean addAll(Collection c)	将指定集合中的所有元素按指定集合的迭代器返回的顺序附加到此列表的末尾。
+		//(10)alist.remove(int index)		删除指定下标的元素
+```
+
+**LinkedList**
+
+```java
+        LinkedList<Integer> alist = new LinkedList<>();
+        alist.add(32);
+        for(Iterator it  = alist.iterator(); it.hasNext(); ) {
+            System.out.println(it.next());
+        }
+
+        for(Integer tmp:alist){
+            System.out.println(tmp);
+        }
+//        boolean add(E e)					在链表后添加一个元素，如果成功，返回true，否则返回false；
+//        void addFirst(E e)				在链表头部插入一个元素；
+//        addLast(E e)						在链表尾部添加一个元素；
+//        void add(int index, E element)	在指定位置插入一个元素。
+
+//        E remove()				移除链表中第一个元素；
+//        boolean remove(Object o)	移除链表中指定的元素；
+//        E remove(int index)		移除链表中指定位置的元素；
+//        E removeFirst()			移除链表中第一个元素，与remove类似；
+//        E removeLast()			移除链表中最后一个元素；
+
+//        E get(int index)            按照下边获取元素；
+//        E getFirst()                获取第一个元素；
+//        E getLast()                 获取第二个元素；
+//        E poll()	               	 删除并返回第一个元素。
+//        boolean contains(Object o)	判断是否含有某一元素。
+```
+
+
+
+### Set接口
+
+Set存储的元素是无序的、不可重复的，它有3个主要实现类：HashSet、LinkedHashSet 和 TreeSet
+
+- HashSet 是 Set 接口的主要实现类 ，底层是 HashMap，可以存储 null 值。它是线程不安全的；
+- LinkedHashSet 是 HashSet 的子类，底层采用了哈希表和链表。能够按照添加的顺序遍历，可以存储null值。
+- TreeSet 底层使用红黑树，能够按照添加元素的顺序进行遍历，排序的方式有自然排序和定制排序。不可以存储null值。
+
+
+
+
+### Map接口
+
+Map使用键值对key-value存储。其中Key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。
+
+此处我们主要介绍HashMap 和 Hashtable
+
+（1）**线程安全性**： HashMap 是非线程安全的，HashTable 是线程安全的,因为 HashTable 内部的方法基本都经过`synchronized` 修饰。不过如果要保证线程安全，还是使用 ConcurrentHashMap ；
+
+（2）**效率**： 因为线程安全的问题，HashMap 要比 HashTable 效率高一点。此外HashTable 基本被淘汰。
+
+（3）**对Null key和 Null value 的支持：** HashMap 可以存储 null 的 key 和 value，但 null 作为键只能有一个，null 作为值可以有多个；HashTable 不允许有 null 键和 null 值，否则会抛出 NullPointerException。
+
+（4）**容量大小：** ① 创建时如果不指定容量初始值，Hashtable 默认的初始大小为 11，之后每次扩充，容量变为原来的 2n+1。HashMap 默认的初始化大小为 16。之后每次扩充，容量变为原来的 2 倍；②创建时如果给定了容量初始值，那么 Hashtable 会直接使用给定的大小，而 HashMap 会将其扩充为 2 的幂次方大小；
+
+**遍历HashMap**
+
+```java
+//(1)
+for (Integer key : map.keySet()) {
+	System.out.println("Key = " + key);
+}
+
+for (Integer value : map.values()) {
+	System.out.println("Value = " + value);
+}
+
+//(2)
+for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+	System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+}
+```
 
 
 
@@ -1326,269 +1551,6 @@ object[0] = "halo";// Error-component type is Pair
 
 
 
-# 集合
-
-## 概述
-
-Java集合大致分为Conllection和Map接口：
-
-<img src="https://user-gold-cdn.xitu.io/2020/7/18/1735fa8a4fbc02ef?w=942&amp;h=461&amp;f=png&amp;s=166242"  />
-
-### Iterator 迭代器
-
-Iterator 迭代器可以用于对集合进行遍历，如果在遍历过程中，集合元素被修改，会抛出 `ConcurrentModificationException` 异常。
-
-```java
-public interface Iterator<E> {
-    //集合中是否还有元素
-    boolean hasNext();
-    //获得集合中的下一个元素
-    E next();
-    ......
-}
-```
-
-**使用示例**
-
-```java
-Map<Integer, String> map = new HashMap();
-map.put(1, "Java");
-map.put(2, "C++");
-map.put(3, "PHP");
-
-Iterator<Map.Entry<Integer, String>> iterator = map.entrySet().iterator();
-while (iterator.hasNext()) {
-  Map.Entry<Integer, String> entry = iterator.next();
-  System.out.println(entry.getKey() + entry.getValue());
-}
-```
-
-
-
-### List接口
-
-List存储的元素是有序，可重复的。它又分为ArrayList，Vector和LinkedList。
-
-其中ArrayList，Vector的底层都是Object[]数组，两者也存在不同之处：
-
-- ArrayList 是 List 的主要实现类，适用于频繁的查找工作，线程不安全
-- Vector 是 List 的古老实现类，它的方法使用了synchronized修饰符，因此线程安全但性能比前者低
-
-如果是在多线程环境下，更推荐如下：
-
-```java
-ArrayList list = Collections.synchronizedList( new ArrayList() );
-```
-
-如果我们需要对一个集合使用自定义排序时，我们就要重写`compareTo()`方法或`compare()`方法。
-
-```java
-ArrayList<Integer> arrayList = new ArrayList<Integer>();
-        arrayList.add(-1);
-        arrayList.add(3);
-        arrayList.add(3);
-        arrayList.add(-5);
-        arrayList.add(7);
-        arrayList.add(4);
-        arrayList.add(-9);
-        arrayList.add(-7);
-        System.out.println("原始数组:");
-        System.out.println(arrayList);
-
-        // void sort(List list),按自然排序的升序排序
-        Collections.sort(arrayList);
-        System.out.println("Collections.sort(arrayList):");
-        System.out.println(arrayList);
-        // 定制排序的用法
-        Collections.sort(arrayList, new Comparator<Integer>() {
-
-            /*
-            	对于compareTo方法：若参数o1大于调用方法的对象o2，则返回小于0的数
-            	对于compare方法：如果返回值小于0，则需要交换o1和o2的顺序。
-            */
-            
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o2.compareTo(o1);		
-            }
-        });
-        System.out.println("定制排序后：");
-        System.out.println(arrayList);
-
-
-/*
-
-原始数组:
-[-1, 3, 3, -5, 7, 4, -9, -7]
-Collections.sort(arrayList):
-[-9, -7, -5, -1, 3, 3, 4, 7]
-定制排序后：
-[7, 4, 3, 3, -1, -5, -7, -9]
-
-*/
-```
-
-如果要比较的对象是自定义类，则需要实现Comparable接口
-
-```java
-public  class Person implements Comparable<Person> {
-    @Override
-    public int compareTo(Person o) {
-        ...
-    }
-}
-```
-
-
-LinkedList底层使用了双向链表。
-
-#### 常用方法
-
-**ArrayList**
-
-```java
-        ArrayList<Integer> alist = new ArrayList<>();
-        alist.add(32);
-		alist.add(0,23);		//(1)在下标0处插入数字
-
-		//(2)遍历方式
-        for(Iterator it  = alist.iterator(); it.hasNext(); ) {
-            System.out.println(it.next());
-        }
-
-        for(Integer tmp:alist){
-            System.out.println(tmp);
-        }
-		for(int i = 0;i < alist.size(); i ++){
-    		System.out.println(list.get(i));
-		}	
-		alist.clear();		//(3)删除所有元素
-
-		//(4) alist.contains(23);
-		//(5)alist.get(0);
-		//(6)alist.indexOf(23) 				返回指定元素第一次出现的列表中的索引，若不存在则返回-1
-		//(7)alist.lastIndexOf(23)			返回指定元素最后一次出现的列表中的索引
-		//(8)int[] arr = alist.toArray() 	返回包含所有元素的数组
-		//(9)boolean addAll(Collection c)	将指定集合中的所有元素按指定集合的迭代器返回的顺序附加到此列表的末尾。
-		//(10)alist.remove(int index)		删除指定下标的元素
-```
-
-**LinkedList**
-
-```java
-        LinkedList<Integer> alist = new LinkedList<>();
-        alist.add(32);
-        for(Iterator it  = alist.iterator(); it.hasNext(); ) {
-            System.out.println(it.next());
-        }
-
-        for(Integer tmp:alist){
-            System.out.println(tmp);
-        }
-//        boolean add(E e)					在链表后添加一个元素，如果成功，返回true，否则返回false；
-//        void addFirst(E e)				在链表头部插入一个元素；
-//        addLast(E e)						在链表尾部添加一个元素；
-//        void add(int index, E element)	在指定位置插入一个元素。
-
-//        E remove()				移除链表中第一个元素；
-//        boolean remove(Object o)	移除链表中指定的元素；
-//        E remove(int index)		移除链表中指定位置的元素；
-//        E removeFirst()			移除链表中第一个元素，与remove类似；
-//        E removeLast()			移除链表中最后一个元素；
-
-//        E get(int index)            按照下边获取元素；
-//        E getFirst()                获取第一个元素；
-//        E getLast()                 获取第二个元素；
-//        E poll()	               	 删除并返回第一个元素。
-//        boolean contains(Object o)	判断是否含有某一元素。
-```
-
-
-
-### Set接口
-
-Set存储的元素是无序的、不可重复的，它有3个主要实现类：HashSet、LinkedHashSet 和 TreeSet
-
-- HashSet 是 Set 接口的主要实现类 ，它的底层是 HashMap，线程不安全的，可以存储 null 值；
-- LinkedHashSet 是 HashSet 的子类，能够按照添加的顺序遍历；
-- TreeSet 底层使用红黑树，能够按照添加元素的顺序进行遍历，排序的方式有自然排序和定制排序。
-
-
-
-
-### Map接口
-
-Map使用键值对key-value存储。其中Key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。
-
-此处我们主要介绍HashMap 和 Hashtable
-
-（1）**线程安全性**： HashMap 是非线程安全的，HashTable 是线程安全的,因为 HashTable 内部的方法基本都经过`synchronized` 修饰。不过如果要保证线程安全，还是使用 ConcurrentHashMap ；
-
-（2）**效率**： 因为线程安全的问题，HashMap 要比 HashTable 效率高一点。此外HashTable 基本被淘汰。
-
-（3）**对Null key和 Null value 的支持：** HashMap 可以存储 null 的 key 和 value，但 null 作为键只能有一个，null 作为值可以有多个；HashTable 不允许有 null 键和 null 值，否则会抛出 NullPointerException。
-
-（4）**容量大小：** ① 创建时如果不指定容量初始值，Hashtable 默认的初始大小为 11，之后每次扩充，容量变为原来的 2n+1。HashMap 默认的初始化大小为 16。之后每次扩充，容量变为原来的 2 倍；②创建时如果给定了容量初始值，那么 Hashtable 会直接使用给定的大小，而 HashMap 会将其扩充为 2 的幂次方大小；
-
-**遍历HashMap**
-
-```java
-//(1)
-for (Integer key : map.keySet()) {
-	System.out.println("Key = " + key);
-}
-
-for (Integer value : map.values()) {
-	System.out.println("Value = " + value);
-}
-
-//(2)
-for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-	System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-}
-```
-
-
-
-
-
-## Arrays.asList()
-
-（1）该方法是泛型方法，传入的对象必须是对象数组。
-
-```java
-int[] myArray = { 1, 2, 3 };
-List myList = Arrays.asList(myArray);
-System.out.println(myList.size());	//1
-System.out.println(myList.get(0));	//数组myArray地址值
-System.out.println(myList.get(1));	//报错：ArrayIndexOutOfBoundsException
-```
-
-当传入一个原生数据类型数组时，`Arrays.asList()` 返回的是数组myArray本身。因此我们需要传入包装类。
-
-（2）在使用该方法把数组转为集合后，不能再使用修改集合的方法，比如add/remove/clear，否则会抛出`UnsupportedOperationException`异常。
-
-```java
-        String[] strArray = new String[] {"sdad", "adssd"};
-        List list = Arrays.asList(strArray);
-//        list.add("ewq");
-```
-
-这是因为该方法返回的是Arrays内部类，它并没有实现集合的修改方法。Arrays.asList()体现的是适配器模式，只是转换接口，后台的数据仍是数组。
-
-那么我们该如何正确的将数组转为ArrayList？
-
-- List list = new ArrayList<>(Arrays.asList("a", "b", "c"))
-- 
-
-## 常用方法
-
-```java
-Arrays.fill(new int[2], 0);
-```
-
-
-
 # 通配符
 
 ## 数组的协变
@@ -1768,3 +1730,8 @@ public boolean add(E e)
 [double精度丢失问题](https://blog.csdn.net/tomcat_2014/article/details/51453988)
 
 《Java核心技术卷一》
+
+
+
+
+
