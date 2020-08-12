@@ -1,3 +1,70 @@
+##  打印从1到最大的n位数
+
+[剑指 Offer 17.](https://leetcode-cn.com/problems/da-yin-cong-1dao-zui-da-de-nwei-shu-lcof/)
+
+**题目：**输入数字 n，按顺序打印出从 1 到最大的 n 位十进制数。比如输入 3，则打印出 1、2、3 一直到最大的 3 位数 999。当n很大时，你需要考虑到类型范围。
+
+**示例 1:**
+
+```
+输入: n = 1
+输出: [1,2,3,4,5,6,7,8,9]
+```
+
+
+
+**题解：**无论是 short / int / long ... 任意变量类型，数字的取值范围都是有限的。因此，大数的表示应用字符串 String 类型。
+
+基于分治思想，先固定高位，向低位递归（向右递归）。当最低位被固定后，将字符串添加为答案里。比如说当n=5时，数字0对应的字符串是00000，为了把高位的0去掉，我们定义一个起始下标start表示字符串里以start为起始节点的字符串是答案之一。此外我们还定义一个变量nineCnt表示当前9数字出现的次数，当以start为起始的字符串里都是9时，则start--，比如说：
+
+- 字符串00009，此时start=4，nineCnt=1，则start--以便之后取到两位数字（00010，00011等）。
+- 字符串00099，此时start=3，nineCnt=2，则start--以便之后取到三位数字（00100，00101等）。
+
+```java
+class Solution {
+    int len, start, curIndx = 0, nineCnt = 0;
+    int[] ans;
+    char[] num, loop = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    public int[] printNumbers(int n) {
+        this.len = n;
+        this.start = len-1;
+        this.num = new char[len];
+        this.ans = new int[(int)Math.pow(10, n) - 1];
+        dfs(0);
+        return ans;
+    }
+
+    public void dfs(int curDigit) {
+        if(curDigit == len) {
+            String str = String.valueOf(num).substring(start);
+            if(!str.equals("0")) {
+                ans[curIndx++] = Integer.parseInt(str);
+            }
+            if(len-start == nineCnt) {
+                start--;
+            }
+            return;
+        }
+
+        for(char number : loop) {
+            if(number == '9') {
+                nineCnt++;
+            }
+            num[curDigit] = number;
+            dfs(curDigit+1);
+        }
+        nineCnt--;
+    }
+}
+```
+
+**复杂度分析：**
+
+- 时间复杂度 O(10^n)： 递归的生成的排列的数量为 10^n10 
+- 空间复杂度 O(n)： 
+
+
+
 ## 课程表
 
 [leetcode207](https://leetcode-cn.com/problems/course-schedule/)
@@ -236,68 +303,97 @@ class Solution {
 
 
 
-##  打印从1到最大的n位数
+## 01 矩阵
 
-[leetcode 剑指 Offer 17.](https://leetcode-cn.com/problems/da-yin-cong-1dao-zui-da-de-nwei-shu-lcof/)
+[leetcode 542](https://leetcode-cn.com/problems/01-matrix/)
 
-**题目：**输入数字 n，按顺序打印出从 1 到最大的 n 位十进制数。比如输入 3，则打印出 1、2、3 一直到最大的 3 位数 999。当n很大时，你需要考虑到类型范围。
+**题目：**给定一个由 0 和 1 组成的矩阵，找出每个元素到最近的 0 的距离。
+
+两个相邻元素间的距离为 1 。
 
 **示例 1:**
 
+输入:
+
 ```
-输入: n = 1
-输出: [1,2,3,4,5,6,7,8,9]
+0 0 0
+0 1 0
+0 0 0
+
+```
+
+输出:
+
+```
+0 0 0
+0 1 0
+0 0 0
+```
+
+**示例 2:**
+输入:
+
+```
+0 0 0
+0 1 0
+1 1 1
+```
+
+
+输出:
+
+```
+0 0 0
+0 1 0
+1 2 1
 ```
 
 
 
-**题解：**无论是 short / int / long ... 任意变量类型，数字的取值范围都是有限的。因此，大数的表示应用字符串 String 类型。
+**题解：**
 
-基于分治思想，先固定高位，向低位递归（向右递归）。当最低位被固定后，将字符串添加为答案里。比如说当n=5时，数字0对应的字符串是00000，为了把高位的0去掉，我们定义一个起始下标start表示字符串里以start为起始节点的字符串是答案之一。此外我们还定义一个变量nineCnt表示当前9数字出现的次数，当以start为起始的字符串里都是9时，则start--，比如说：
+首先我们通过一个队列来统计数值零的下标，并把非零数置为-1表示尚未访问过。原数组matrix将作为结果去返回。
 
-- 字符串00009，此时start=4，nineCnt=1，则start--以便之后取到两位数字（00010，00011等）。
-- 字符串00099，此时start=3，nineCnt=2，则start--以便之后取到三位数字（00100，00101等）。
+遍历队列，此时队列里存储都是大于等于数值0的下标(x, y)，我们以这些下标为起点，上下左右探索到一个位置(newX, newY)，如果(newX, newY)的值是-1，则它到最近数值0的距离等于matrix\[x][y]+1。
 
 ```java
-class Solution {
-    int len, start, curIndx = 0, nineCnt = 0;
-    int[] ans;
-    char[] num, loop = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    public int[] printNumbers(int n) {
-        this.len = n;
-        this.start = len-1;
-        this.num = new char[len];
-        this.ans = new int[(int)Math.pow(10, n) - 1];
-        dfs(0);
-        return ans;
-    }
+    public int[][] updateMatrix(int[][] matrix) {
+        int row = matrix.length;
+        int col = matrix[0].length;
+        Queue<int[]> queue = new LinkedList<>();
 
-    public void dfs(int curDigit) {
-        if(curDigit == len) {
-            String str = String.valueOf(num).substring(start);
-            if(!str.equals("0")) {
-                ans[curIndx++] = Integer.parseInt(str);
+        for(int i=0; i<row; i++) {
+            for(int j=0; j<col; j++) {
+                if(matrix[i][j] == 0) {
+                    queue.offer(new int[]{i, j});
+                }else {     //对于没有访问过非零数置为-1
+                    matrix[i][j] = -1;
+                }
             }
-            if(len-start == nineCnt) {
-                start--;
-            }
-            return;
         }
 
-        for(char number : loop) {
-            if(number == '9') {
-                nineCnt++;
+        int[] mvX = new int[]{-1, 1, 0, 0};
+        int[] mvY = new int[]{0, 0, -1, 1};
+
+        while(!queue.isEmpty()) {
+            int[] point = queue.poll();
+            int x = point[0], y = point[1];
+            //大于等于0的数(x, y)向四周延伸
+            for(int i=0; i<4; i++) {
+                int newX = x + mvX[i];
+                int newY = y + mvY[i];
+                //如果(newX, newY)没有被访问过，则它到最近0的距离等于matrix[x][y]+1
+                if(newX>=0 && newX<row && newY>=0 && newY<col && matrix[newX][newY]==-1) {
+                    matrix[newX][newY] = matrix[x][y] + 1;
+                    queue.offer(new int[]{newX, newY});
+                }
             }
-            num[curDigit] = number;
-            dfs(curDigit+1);
         }
-        nineCnt--;
+
+        return matrix;
     }
-}
 ```
 
-**复杂度分析：**
 
-- 时间复杂度 O(10^n)： 递归的生成的排列的数量为 10^n10 
-- 空间复杂度 O(n)： 
 
+**时间复杂度**：O(n*m)

@@ -1,4 +1,4 @@
-# SimpleDateFormat的线程不安全性
+SimpleDateFormat的线程不安全性
 
 现在有一个需求：在多线程环境下去格式化时间。那么我们就需要SimpleDateFormat 类
 

@@ -4,6 +4,11 @@ Java程序从源代码到运行分为如下步骤：
 
 ![](https://user-gold-cdn.xitu.io/2020/5/2/171d2af6c23d1561?w=1327&h=248&f=png&s=59424)
 
+**JVM是跨平台的吗？**
+
+JVM不是跨平台的，不同的平台需要安装对应版本的JVM才能运行（比如说有Windows版的JVM，Linux系统的JVM）。而Java语言通过不同系统上的JVM对Java语言进行编译和运行，因此Java语言是跨平台的。
+
+
 
 **JDK和JRE**
 
@@ -292,18 +297,20 @@ public class Child extends Parent  {
 ## final
 （1）**当final作用于基本类型变量**：变量值不能变。
 
-（2）**当final作用于引用变量**：引用变量存放的是内存地址，地址不能变即不能指向另一个对象，但地址指向的对象可变。
+（2）**当final作用于引用变量**：引用变量存放的是内存地址，地址不能变即不能指向另一个对象，但指向的对象内容可变。
 
 ```java
         final StringBuffer stringBuffer = new StringBuffer("123");
 //        stringBuffer = new StringBuffer("1");   报错
         stringBuffer.append("12");
 ```
+如果是作用于集合（比如HashMap），则集合的内容可以修改（比如说可以put键值对），但集合对象不能指向其他引用。
+
 （3）**当final作用于类**：该类无法被继承，且类中的方法会被隐式地指定为 final 方法，，但成员变量则不会变。
 
 
 
-## instance of
+**instance of**
 
 用于判断某一对象是否为某一类型或其子类。而getClass方法返回的是该对象实际指向的类型。
 
@@ -1114,7 +1121,26 @@ while (iterator.hasNext()) {
   Map.Entry<Integer, String> entry = iterator.next();
   System.out.println(entry.getKey() + entry.getValue());
 }
+
+ArrayList<Integer> alist = new ArrayList<>();
+alist.add(32);
+alist.add(0,23);		//(1)在下标0处插入数字
+
+//(2)遍历方式
+for(Iterator it  = alist.iterator(); it.hasNext(); ) {
+        System.out.println(it.next());
+}
 ```
+
+**for循环和iterator循环的区别**
+
+（1）iterato遍历集合时不能同时**对集合**做修改或增加之类，否则会报ConcurrentModificationException错误。增强for循环的底层是使用了迭代器遍历，因此遍历时也不能对数组操作。
+
+>iterato提供了一个remove方法用来删除上次调用next（）时返回的元素
+
+（2）for循环遍历可以一边遍历一边对集合操作，捕获抛异常。
+
+
 
 
 
@@ -1202,11 +1228,6 @@ public  class Person implements Comparable<Person> {
         ArrayList<Integer> alist = new ArrayList<>();
         alist.add(32);
 		alist.add(0,23);		//(1)在下标0处插入数字
-
-		//(2)遍历方式
-        for(Iterator it  = alist.iterator(); it.hasNext(); ) {
-            System.out.println(it.next());
-        }
 
         for(Integer tmp:alist){
             System.out.println(tmp);
@@ -1299,6 +1320,10 @@ for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
 	System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 }
 ```
+
+**LinkedHashMap 和 TreeMap**
+
+这两个是按照插入顺序的map，
 
 
 
