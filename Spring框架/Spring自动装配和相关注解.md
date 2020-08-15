@@ -554,3 +554,147 @@ public class MyConfig {
 @Import(MyConfig2.class) 
 ```
 
+
+
+## @ExceptionHandler
+
+**@ExceptionHandler**
+
+如果一个Controller类里有方法加了@ExceptionHandler，那么这个Controller的其他方法中没有捕获的异常就会以参数的形式传入进来。比如下方handlerException方法。
+
+```java
+	@RequestMapping("/get")
+    @ResponseBody
+    public CommonReturnType getUser(@RequestParam(name = "id")Integer id) throws BusinessException{
+        UserModel userModel = userService.getUserById(id);
+        if(userModel == null) {
+            throw new BusinessException(EmBusinessError.USERR_NOT_EXIST);		//此处抛出异常
+        }
+        //...
+    }	
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Object handlerException(HttpServletRequest request, Exception ex) {
+        BusinessException buEx = (BusinessException)ex;
+        CommonReturnType commonReturnType = new CommonReturnType();
+        commonReturnType.setStatus("fail");
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("errCode", buEx.getErrCode());
+        responseMap.put("errMsg", buEx.getErrMsg());
+        commonReturnType.setData(responseMap);
+        return commonReturnType;
+    }
+```
+
+可以看一下方法参数ex的值
+
+<img src="https://user-gold-cdn.xitu.io/2020/7/22/17376ab7d7f0b88f?w=1288&amp;h=751&amp;f=png&amp;s=92845" style="zoom:67%;" />
+
+你可以定义一个基类BaseController，然后让其他Controller类都继承自它，这样子类Controller抛出的异常都可以在父类BaseController里捕获。
+
+## **@ResponseStatus**
+
+它用于修饰一个类或者一个方法：
+
+- 修饰一个类的时候一般是一个异常类对类中所有方法起作用；
+- 当修饰一个方法时则是当该方法被触发且内部发生@ResponseStatus修饰异常时才起作用。
+
+当它修饰一个异常类时，如果这个异常类被抛出，则使用该注解上的**error code 和 error reasoon 返回给客户端**
+
+```java
+/**
+ * 自定义一个异常类，用@ResponseStatus修饰，当这个异常类型发生时用403和"Are you okay?"输出
+ */
+@ResponseStatus(value = HttpStatus.FORBIDDEN, reason = "Are you okay?")
+public class MyException extends RuntimeException {
+}
+```
+
+抛出异常：
+
+```java
+@Controller
+@RequestMapping(value="/web")
+public class MyController {
+
+    @RequestMapping(value="/hi", method = RequestMethod.GET)
+    @ResponseBody
+    public String sayHi(@RequestParam("name") String name){
+        if ("yang".equals(name)){
+            throw new MyException();
+        }
+       //...
+    }
+   
+}
+```
+
+展示图：
+
+![](https://user-gold-cdn.xitu.io/2020/7/22/173773b57b2a9a50?w=601&h=151&f=png&s=49654)
+
+
+
+## @CrossOrigin
+
+```javascript
+ $.ajax({
+                type:"POST",
+                contentType:"application/x-www-form-urlencoded",
+                url:"http://localhost:8080/user/getotp",
+                data:{
+                    "telphone":$("#telphone").val(),
+                },
+                //允许跨域请求
+               // xhrFields:{withCredentials:true},
+                success:function (data) {
+                    if (data.status=="success") {
+                        alert("otp已经发送到了您的手机，请注意查收");
+                        window.location.href="register.html";
+                    }else {
+                        alert("otp发送失败，原因为" + data.data.errMsg);
+                    }
+                },
+                error:function (data) {
+                    alert("otp发送失败，原因为"+data.responseText);
+                }
+            });
+```
+
+在本项目中，ajax请求的页面是放在独立于项目的另一个文件夹里，也就是说，ajax对应的域是本地文件，但是我们请求的服务器是localhost域名。虽然请求能够到达服务端，并且服务端可以返回，但ajax认为两者的域不同，因而走不到
+
+![](https://user-gold-cdn.xitu.io/2020/7/26/17388f1eea903364?w=1789&h=46&f=png&s=88966)
+
+Springboot提供了一个@CrossOrigin ，该注解可以在响应头上添加`Access-Controller-Allow-Origin`字段，其值为*。
+
+## @Transactional
+
+注解在方法上表示方法里的所有sql操作为一个事务。
+
+
+
+## @Param
+
+常用在Mapper类里：
+
+```java
+//com.jnju.dao.ItemStockDaoMapper
+int decreaseStock(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
+```
+
+它对应映射文件里传入的参数值：
+
+```xml
+  <update id="decreaseStock">
+    update item_stock
+    set stock = stock - #{amount}
+    where item_id = #{itemId} and stock >= #{amount}
+  </update>
+```
+
+
+
+## @PostConstruct
